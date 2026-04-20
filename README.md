@@ -444,12 +444,3 @@ If you want to deploy this on a different server (different IP, different user, 
 
 1. `/app/env.conf` → update all `COGNITO_*` and `AWS_REGION` variables
 2. No code changes needed — all read from environment
-
-### Production hardening checklist
-
-- [ ] Set `APP_ENV=production` in env.conf (enables HTTPS-only cookies + HSTS)
-- [ ] Put gunicorn in front of Flask: `gunicorn -w 4 -b 127.0.0.1:5000 web-portal:app`
-- [ ] Put nginx as reverse proxy with TLS termination
-- [ ] Replace in-memory session store with Redis: change `storage_uri` in flask-limiter config and implement Redis-backed `session_store`
-- [ ] Set up log rotation for journald
-- [ ] Restrict server firewall: only expose the portal port (e.g. 443) and WireGuard port (51820/udp)
