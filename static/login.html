@@ -1,0 +1,668 @@
+<!-- public/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Secure VPN Access Portal">
+    <link href="/favicon.svg" rel="icon" type="image/svg+xml">
+
+    <!-- Security Headers (must be mirrored in server config) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.amazoncognito.com https://*.amazonaws.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()">
+    
+    <title>Secure VPN Portal</title>
+    <style>
+        /* CSS Reset and Security Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Prevent text selection on sensitive elements (anti-shoulder surfing) */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a0f0f 0%, #2d1f1f 50%, #1f1414 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background overlay for depth */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 87, 34, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 440px;
+            padding: 0 24px;
+        }
+
+        /* VPN Logo with Signal Waves */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 48px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .signal-waves {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 30px;
+            margin-bottom: 8px;
+            gap: 4px;
+        }
+
+        .wave {
+            width: 4px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 2px;
+            animation: wave 1.5s ease-in-out infinite;
+        }
+
+        .wave:nth-child(1) { height: 8px; animation-delay: 0s; }
+        .wave:nth-child(2) { height: 16px; animation-delay: 0.1s; }
+        .wave:nth-child(3) { height: 24px; animation-delay: 0.2s; }
+        .wave:nth-child(4) { height: 16px; animation-delay: 0.3s; }
+        .wave:nth-child(5) { height: 8px; animation-delay: 0.4s; }
+
+        @keyframes wave {
+            0%, 100% { opacity: 0.3; transform: scaleY(0.8); }
+            50% { opacity: 1; transform: scaleY(1); }
+        }
+
+        .logo-text {
+            font-size: 48px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 4px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Glassmorphism Form Container */
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        h2 {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+
+        /* Secure input styling with autofill protection */
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+            -webkit-text-fill-color: #ffffff;
+            -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.05) inset;
+        }
+
+        input:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+            -webkit-text-fill-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Password visibility toggle (accessibility) */
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 38px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* QR Code Container */
+        .qr-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .qr-code {
+            max-width: 200px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .secret-key {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #333;
+            margin-top: 12px;
+            word-break: break-all;
+            user-select: all;
+        }
+
+        /* Primary Button (Orange) */
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #666;
+        }
+
+        /* Loading State */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        .btn-primary.loading .spinner {
+            display: block;
+        }
+
+        .btn-primary.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error Message (NIST 800-63B: Generic error messages to prevent user enumeration) */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .alert-error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.4);
+            color: #ff9f9f;
+        }
+
+        .alert-success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.4);
+            color: #9fffbf;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Helper text */
+        .helper-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            margin-top: 6px;
+            padding-left: 4px;
+        }
+
+        /* Session timeout warning */
+        .timeout-warning {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 193, 7, 0.9);
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Forgot / back navigation links */
+        .forgot-link {
+            text-align: right;
+            margin-top: 12px;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .forgot-link a,
+        .back-link a {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .forgot-link a:hover,
+        .back-link a:hover {
+            color: rgba(255, 107, 53, 0.9);
+        }
+    </style>
+</head>
+<body class="no-select">
+
+    <div class="timeout-warning" id="timeoutWarning">
+        Session expiring soon. Please complete your action.
+    </div>
+
+    <div class="container">
+        <!-- VPN Logo -->
+        <div class="logo-container">
+            <div class="signal-waves">
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="wave"></div>
+            </div>
+            <div class="logo-text">VPN</div>
+        </div>
+
+        <div class="form-container">
+            <!-- Step 1: Username/Password -->
+            <div id="step-login" class="form-step active">
+                <h2>Welcome Back</h2>
+                <p class="subtitle">Enter your credentials to access the secure VPN</p>
+                
+                <div class="alert alert-error" id="loginError" role="alert" aria-live="polite"></div>
+
+                <form id="loginForm" method="POST" action="#" novalidate>
+                    <div class="input-group">
+                        <label for="username">Username or Email</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            placeholder="Username or email" 
+                            required 
+                            autocomplete="username"
+                            maxlength="128"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            placeholder="Enter your password" 
+                            required 
+                            autocomplete="current-password"
+                            maxlength="256"
+                        >
+                        <button type="button" class="password-toggle" data-toggle="password" tabindex="-1">
+                            Show
+                        </button>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="loginBtn">
+                        <span class="spinner"></span>
+                        <span class="btn-text">Sign In</span>
+                    </button>
+                </form>
+                <div class="forgot-link">
+                    <a href="#" id="forgotPasswordLink">Forgot password?</a>
+                </div>
+            </div>
+
+            <!-- Step 2: Change Password (First Time) -->
+            <div id="step-new-password" class="form-step">
+                <h2>Update Password</h2>
+                <p class="subtitle">Please set a permanent password to continue</p>
+                
+                <div class="alert alert-error" id="passwordError" role="alert" aria-live="polite"></div>
+
+                <form id="newPasswordForm" method="POST" action="#" novalidate>
+                    <div class="input-group">
+                        <label for="newPassword">New Password</label>
+                        <input 
+                            type="password" 
+                            id="newPassword" 
+                            name="newPassword" 
+                            placeholder="Create strong password" 
+                            required 
+                            autocomplete="new-password"
+                            minlength="12"
+                            maxlength="256"
+                            aria-describedby="passwordRequirements"
+                        >
+                        <p class="helper-text" id="passwordRequirements">
+                            Minimum 12 characters, mixed case, numbers, and symbols
+                        </p>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input 
+                            type="password" 
+                            id="confirmPassword" 
+                            name="confirmPassword" 
+                            placeholder="Repeat password" 
+                            required 
+                            autocomplete="new-password"
+                            maxlength="256"
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="passwordBtn">
+                        <span class="spinner"></span>
+                        <span class="btn-text">Update Password</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Step 3: MFA Setup (QR Code) -->
+            <div id="step-mfa-setup" class="form-step">
+                <h2>Setup Two-Factor Auth</h2>
+                <p class="subtitle">Scan with Microsoft Authenticator or Google Authenticator</p>
+                
+                <div class="alert alert-error" id="mfaSetupError" role="alert" aria-live="polite"></div>
+                <div class="alert alert-success" id="mfaSetupSuccess" role="alert" aria-live="polite" style="display: none;">
+                    TOTP configured successfully!
+                </div>
+
+                <div class="qr-container">
+                    <img id="qrCode" class="qr-code" alt="TOTP QR Code" src="">
+                    <div class="secret-key" id="secretKey"></div>
+                </div>
+
+                <form id="mfaSetupForm" method="POST" action="#" novalidate>
+                    <div class="input-group">
+                        <label for="setupTotpCode">Verification Code</label>
+                        <input 
+                            type="text" 
+                            id="setupTotpCode" 
+                            name="setupTotpCode" 
+                            placeholder="000000" 
+                            required 
+                            inputmode="numeric"
+                            pattern="[0-9]{6}"
+                            maxlength="6"
+                            autocomplete="one-time-code"
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="setupMfaBtn">
+                        <span class="spinner"></span>
+                        <span class="btn-text">Verify & Continue</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Step 4: TOTP Verification -->
+            <div id="step-totp" class="form-step">
+                <h2>Two-Factor Authentication</h2>
+                <p class="subtitle">Enter the 6-digit code from your authenticator app</p>
+                
+                <div class="alert alert-error" id="totpError" role="alert" aria-live="polite"></div>
+
+                <form id="totpForm" method="POST" action="#" novalidate>
+                    <div class="input-group">
+                        <label for="totpCode">Authentication Code</label>
+                        <input 
+                            type="text" 
+                            id="totpCode" 
+                            name="totpCode" 
+                            placeholder="000000" 
+                            required 
+                            inputmode="numeric"
+                            pattern="[0-9]{6}"
+                            maxlength="6"
+                            autocomplete="one-time-code"
+                            autofocus
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="totpBtn">
+                        <span class="spinner"></span>
+                        <span class="btn-text">Verify</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Step 5: Forgot Password — Request Code -->
+            <div id="step-forgot-request" class="form-step">
+                <h2>Reset Password</h2>
+                <p class="subtitle">Enter your username or email to receive a reset code</p>
+
+                <div class="alert alert-error" id="forgotRequestError" role="alert" aria-live="polite"></div>
+                <div class="alert alert-success" id="forgotRequestSuccess" role="alert" aria-live="polite"></div>
+
+                <form id="forgotRequestForm" method="POST" action="#" novalidate>
+                    <div class="input-group">
+                        <label for="forgotEmail">Username or Email</label>
+                        <input
+                            type="text"
+                            id="forgotEmail"
+                            name="forgotEmail"
+                            placeholder="Username or email"
+                            required
+                            autocomplete="username"
+                            maxlength="128"
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="forgotRequestBtn">
+                        <span class="spinner"></span>
+                        <span class="btn-text">Send Reset Code</span>
+                    </button>
+                </form>
+                <div class="back-link">
+                    <a href="#" id="backToLoginFromForgot">&larr; Back to sign in</a>
+                </div>
+            </div>
+
+            <!-- Step 6: Forgot Password — Enter Code + New Password -->
+            <div id="step-forgot-confirm" class="form-step">
+                <h2>Set New Password</h2>
+                <p class="subtitle">Enter the 6-digit code from your email and choose a new password</p>
+
+                <div class="alert alert-error" id="forgotConfirmError" role="alert" aria-live="polite"></div>
+
+                <form id="forgotConfirmForm" method="POST" action="#" novalidate>
+                    <div class="input-group">
+                        <label for="resetCode">Reset Code</label>
+                        <input
+                            type="text"
+                            id="resetCode"
+                            name="resetCode"
+                            placeholder="6-digit code from email"
+                            required
+                            inputmode="numeric"
+                            pattern="[0-9]{6}"
+                            maxlength="6"
+                            autocomplete="one-time-code"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="resetPassword">New Password</label>
+                        <input
+                            type="password"
+                            id="resetPassword"
+                            name="resetPassword"
+                            placeholder="Create strong password"
+                            required
+                            autocomplete="new-password"
+                            minlength="12"
+                            maxlength="256"
+                            aria-describedby="resetPasswordHint"
+                        >
+                        <button type="button" class="password-toggle" data-toggle="resetPassword" tabindex="-1">Show</button>
+                        <p class="helper-text" id="resetPasswordHint">Minimum 12 characters, mixed case, numbers, and symbols</p>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="resetPasswordConfirm">Confirm Password</label>
+                        <input
+                            type="password"
+                            id="resetPasswordConfirm"
+                            name="resetPasswordConfirm"
+                            placeholder="Repeat password"
+                            required
+                            autocomplete="new-password"
+                            maxlength="256"
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="forgotConfirmBtn">
+                        <span class="spinner"></span>
+                        <span class="btn-text">Set New Password</span>
+                    </button>
+                </form>
+                <div class="back-link">
+                    <a href="#" id="backToForgotRequest">&larr; Request a new code</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>

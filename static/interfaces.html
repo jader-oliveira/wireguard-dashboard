@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; img-src 'self' data:; font-src 'self' https://cdn.jsdelivr.net; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <title>VPN Portal — Interfaces</title>
+    <link href="/favicon.svg" rel="icon" type="image/svg+xml">
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-primary:    #e84118;
+            --brand-dark:       #1a0a0a;
+            --brand-surface:    #1e1e2e;
+            --brand-surface-2:  #27273a;
+            --brand-border:     rgba(255,255,255,0.08);
+            --brand-text:       #e2e2f0;
+            --brand-muted:      #8888a8;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: var(--brand-dark);
+            color: var(--brand-text);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ── Navbar ─────────────────────────────────────────────── */
+        .navbar-vpn {
+            background: rgba(10,5,5,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--brand-border);
+            padding: 0 1.5rem;
+            height: 64px;
+        }
+        .navbar-brand-vpn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            color: #fff !important;
+            text-decoration: none;
+        }
+        .navbar-brand-vpn .brand-icon {
+            width: 36px; height: 36px;
+            background: var(--brand-primary);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; color: #fff;
+        }
+        .nav-link-vpn {
+            color: rgba(255,255,255,0.6) !important;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            padding: 0 1rem !important;
+            height: 64px;
+            display: flex !important;
+            align-items: center;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .nav-link-vpn:hover,
+        .nav-link-vpn.active {
+            color: #fff !important;
+            border-bottom-color: var(--brand-primary);
+        }
+        .user-badge { display: flex; align-items: center; gap: 10px; cursor: default; }
+        .user-avatar {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, var(--brand-primary), #f7931e);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 700; color: #fff; flex-shrink: 0;
+        }
+        .user-info small { display: block; line-height: 1.1; }
+        .btn-logout {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.7);
+            font-size: 0.8rem;
+            padding: 5px 14px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .btn-logout:hover {
+            background: rgba(232,65,24,0.15);
+            border-color: var(--brand-primary);
+            color: #fff;
+        }
+        .coming-soon {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: rgba(232,65,24,0.2);
+            color: var(--brand-primary);
+            padding: 1px 5px;
+            border-radius: 4px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        /* ── Page Header ─────────────────────────────────────────── */
+        .page-header {
+            background: linear-gradient(135deg, #0f0808 0%, #1e1010 50%, #0f0a1a 100%);
+            border-bottom: 1px solid var(--brand-border);
+            padding: 1.75rem 0 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-header::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 20% 50%, rgba(232,65,24,0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .page-header-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 0;
+        }
+        .page-header-title span { color: var(--brand-primary); }
+        .page-breadcrumb {
+            font-size: 0.75rem;
+            color: var(--brand-muted);
+            margin-top: 0.25rem;
+        }
+        .page-breadcrumb a { color: var(--brand-muted); text-decoration: none; }
+        .page-breadcrumb a:hover { color: var(--brand-text); }
+
+        /* ── Controls Bar ────────────────────────────────────────── */
+        .controls-bar {
+            background: var(--brand-surface);
+            border-bottom: 1px solid var(--brand-border);
+            padding: 0.875rem 0;
+        }
+        .iface-selector {
+            background: var(--brand-surface-2);
+            border: 1px solid var(--brand-border);
+            color: var(--brand-text);
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: 0.875rem;
+            min-width: 160px;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238888a8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+            cursor: pointer;
+        }
+        .iface-selector:focus { outline: none; border-color: var(--brand-primary); box-shadow: 0 0 0 3px rgba(232,65,24,0.15); }
+        .iface-selector option { background: var(--brand-surface-2); }
+
+        .btn-iface-action {
+            background: var(--brand-primary);
+            border: none;
+            color: #fff;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 7px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-iface-action:hover { background: #d43510; }
+        .btn-iface-action:disabled { opacity: 0.45; cursor: not-allowed; }
+        .btn-outline-muted {
+            background: transparent;
+            border: 1px solid var(--brand-border);
+            color: var(--brand-muted);
+            font-size: 0.82rem;
+            padding: 7px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-outline-muted:hover { border-color: rgba(255,255,255,0.25); color: var(--brand-text); }
+
+        /* ── Service badge ───────────────────────────────────────── */
+        .svc-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        .svc-badge .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+        }
+        .svc-active   { background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.3);  color: #2ecc71; }
+        .svc-active .dot   { background: #2ecc71; animation: pulse-green 2s infinite; }
+        .svc-inactive { background: rgba(255,100,100,0.10); border: 1px solid rgba(255,100,100,0.3); color: #e74c3c; }
+        .svc-inactive .dot { background: #e74c3c; }
+        .svc-unknown  { background: rgba(180,180,210,0.10); border: 1px solid rgba(180,180,210,0.2); color: var(--brand-muted); }
+        .svc-unknown .dot  { background: var(--brand-muted); }
+
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+        }
+
+        /* ── Glass Card ──────────────────────────────────────────── */
+        .glass-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--brand-border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .glass-card-header {
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid var(--brand-border);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .glass-card-header h5 {
+            margin: 0;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--brand-text);
+        }
+        .glass-card-header .header-icon {
+            width: 32px; height: 32px;
+            background: rgba(232,65,24,0.15);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--brand-primary);
+            font-size: 0.95rem;
+        }
+
+        /* ── Interface Info Grid ─────────────────────────────────── */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        @media (max-width: 768px) { .info-grid { grid-template-columns: 1fr; } }
+
+        .info-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--brand-border);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .info-item:nth-child(odd) { border-right: 1px solid var(--brand-border); }
+        .info-item:last-child,
+        .info-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+        .info-item:nth-last-child(1) { border-bottom: none; }
+        .info-label {
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--brand-muted);
+        }
+        .info-value {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--brand-text);
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+        }
+        .info-value.monospace { font-family: 'Courier New', monospace; }
+
+        .stat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 2px 9px;
+            border-radius: 12px;
+        }
+        .stat-pill-green { background: rgba(46,204,113,0.12); color: #2ecc71; }
+        .stat-pill-blue  { background: rgba(52,152,219,0.12); color: #3498db; }
+        .stat-pill-muted { background: rgba(180,180,210,0.10); color: var(--brand-muted); }
+
+        /* ── Peers Table ─────────────────────────────────────────── */
+        .peers-card { margin-top: 1.5rem; }
+
+        .search-box {
+            position: relative;
+            min-width: 240px;
+        }
+        .search-box input {
+            background: var(--brand-surface-2);
+            border: 1px solid var(--brand-border);
+            color: var(--brand-text);
+            border-radius: 8px;
+            padding: 7px 14px 7px 36px;
+            font-size: 0.82rem;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+        .search-box input:focus { outline: none; border-color: rgba(232,65,24,0.5); }
+        .search-box input::placeholder { color: var(--brand-muted); }
+        .search-box .search-icon {
+            position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+            color: var(--brand-muted); font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        .vpn-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.83rem;
+        }
+        .vpn-table thead th {
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid var(--brand-border);
+            padding: 0.75rem 1rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--brand-muted);
+            white-space: nowrap;
+        }
+        .vpn-table thead th:first-child { padding-left: 1.5rem; }
+        .vpn-table thead th:last-child  { padding-right: 1.5rem; text-align: right; }
+
+        .vpn-table tbody tr {
+            border-bottom: 1px solid var(--brand-border);
+            transition: background 0.15s;
+        }
+        .vpn-table tbody tr:last-child { border-bottom: none; }
+        .vpn-table tbody tr:hover { background: rgba(255,255,255,0.025); }
+
+        .vpn-table td {
+            padding: 0.875rem 1rem;
+            vertical-align: middle;
+            color: var(--brand-text);
+        }
+        .vpn-table td:first-child { padding-left: 1.5rem; }
+        .vpn-table td:last-child  { padding-right: 1.5rem; text-align: right; }
+
+        .peer-name { font-weight: 600; font-size: 0.85rem; }
+        .peer-key  { font-size: 0.72rem; color: var(--brand-muted); font-family: 'Courier New', monospace; }
+
+        .ip-badge {
+            display: inline-block;
+            background: rgba(52,152,219,0.1);
+            border: 1px solid rgba(52,152,219,0.2);
+            color: #74b9e8;
+            font-size: 0.72rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            margin: 1px;
+        }
+
+        /* Status pill for connected/disconnected */
+        .status-connected {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(46,204,113,0.12);
+            border: 1px solid rgba(46,204,113,0.3);
+            color: #2ecc71;
+            font-size: 0.72rem; font-weight: 600;
+            padding: 3px 8px; border-radius: 20px;
+        }
+        .status-connected .dot { width: 6px; height: 6px; background: #2ecc71; border-radius: 50%; animation: pulse-green 2s infinite; }
+        .status-disconnected {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(180,180,210,0.08);
+            border: 1px solid rgba(180,180,210,0.15);
+            color: var(--brand-muted);
+            font-size: 0.72rem; font-weight: 600;
+            padding: 3px 8px; border-radius: 20px;
+        }
+        .status-disconnected .dot { width: 6px; height: 6px; background: var(--brand-muted); border-radius: 50%; }
+
+        .rxtx {
+            font-family: 'Courier New', monospace;
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+        .rxtx .rx { color: #2ecc71; }
+        .rxtx .tx { color: #e67e22; }
+        .rxtx .sep { color: var(--brand-muted); margin: 0 3px; }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--brand-border);
+            color: var(--brand-muted);
+            width: 30px; height: 30px;
+            border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+        .action-btn:hover {
+            border-color: rgba(255,255,255,0.25);
+            color: var(--brand-text);
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* ── Pagination ──────────────────────────────────────────── */
+        .pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.875rem 1.5rem;
+            border-top: 1px solid var(--brand-border);
+            font-size: 0.78rem;
+            color: var(--brand-muted);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .pagination-info { white-space: nowrap; }
+        .per-page-select {
+            background: var(--brand-surface-2);
+            border: 1px solid var(--brand-border);
+            color: var(--brand-muted);
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 0.75rem;
+        }
+        .pagination-btns { display: flex; gap: 4px; }
+        .pg-btn {
+            background: var(--brand-surface-2);
+            border: 1px solid var(--brand-border);
+            color: var(--brand-muted);
+            width: 30px; height: 30px;
+            border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            font-size: 0.78rem;
+            transition: all 0.2s;
+        }
+        .pg-btn:hover, .pg-btn.active {
+            background: var(--brand-primary);
+            border-color: var(--brand-primary);
+            color: #fff;
+        }
+        .pg-btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+
+        /* ── Empty / Error states ────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--brand-muted);
+        }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.4; }
+        .empty-state p { font-size: 0.875rem; }
+
+        .spinner-ring {
+            display: inline-block;
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-top-color: var(--brand-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .refresh-btn {
+            background: transparent;
+            border: 1px solid var(--brand-border);
+            color: var(--brand-muted);
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .refresh-btn:hover { border-color: rgba(255,255,255,0.25); color: var(--brand-text); }
+        .refresh-btn.spinning i { animation: spin 0.8s linear infinite; }
+
+        /* ── Idle overlay ────────────────────────────────────────── */
+        #idleOverlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            align-items: center; justify-content: center;
+        }
+        #idleOverlay.show { display: flex; }
+        .idle-box {
+            background: var(--brand-surface);
+            border: 1px solid var(--brand-border);
+            border-radius: 14px;
+            padding: 2rem 2.5rem;
+            max-width: 380px;
+            text-align: center;
+        }
+        .idle-box h5 { color: var(--brand-primary); font-weight: 700; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════════════════════════════ -->
+<nav class="navbar-vpn d-flex align-items-center justify-content-between sticky-top">
+
+    <!-- Brand -->
+    <a class="navbar-brand-vpn" href="/home">
+        <div class="brand-icon"><i class="bi bi-shield-lock-fill"></i></div>
+        VPN PORTAL
+    </a>
+
+    <!-- Nav links -->
+    <div class="d-none d-md-flex h-100">
+        <a href="/home" class="nav-link-vpn">Home</a>
+        <a href="/interfaces" class="nav-link-vpn active">Interfaces</a>
+        <a href="#" class="nav-link-vpn">Users <span class="coming-soon">soon</span></a>
+        <a href="#" class="nav-link-vpn">Key Generator <span class="coming-soon">soon</span></a>
+    </div>
+
+    <!-- User + Logout -->
+    <div class="d-flex align-items-center gap-3">
+        <div class="user-badge">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <div class="user-info d-none d-sm-block">
+                <small class="text-white fw-semibold" id="userEmail" style="font-size:0.8rem;">Loading…</small>
+                <small class="text-muted" style="font-size:0.7rem;">Authenticated</small>
+            </div>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+            <i class="bi bi-box-arrow-right me-1"></i>Logout
+        </button>
+    </div>
+
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PAGE HEADER
+════════════════════════════════════════════════════════════════ -->
+<div class="page-header">
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <h1 class="page-header-title">Interface <span>Administration</span></h1>
+                <div class="page-breadcrumb">
+                    <a href="/home">Home</a>
+                    <span class="mx-1 opacity-40">›</span>
+                    <span>Interfaces</span>
+                </div>
+            </div>
+            <div id="serviceBadgeWrap"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CONTROLS BAR
+════════════════════════════════════════════════════════════════ -->
+<div class="controls-bar">
+    <div class="container-fluid px-4 d-flex align-items-center justify-content-between gap-3 flex-wrap">
+        <div class="d-flex align-items-center gap-2">
+            <span style="font-size:0.8rem; color:var(--brand-muted); letter-spacing:0.5px;">INTERFACE</span>
+            <div class="position-relative">
+                <select class="iface-selector" id="ifaceSelector">
+                    <option value="">Loading…</option>
+                </select>
+            </div>
+            <button class="refresh-btn" id="refreshBtn" title="Refresh">
+                <i class="bi bi-arrow-clockwise"></i>
+                <span class="d-none d-sm-inline">Refresh</span>
+            </button>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <small id="lastUpdated" style="font-size:0.72rem; color:var(--brand-muted);"></small>
+            <button class="btn-iface-action" disabled title="Coming soon">
+                <i class="bi bi-plus-lg"></i>
+                <span class="d-none d-sm-inline">Add Interface</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════════════════════ -->
+<div class="container-fluid px-4 py-4">
+
+    <!-- Loading spinner -->
+    <div id="loadingState" class="text-center py-5" style="display:none !important;">
+        <div class="spinner-ring" style="width:32px;height:32px;border-width:3px;"></div>
+        <p class="mt-3" style="color:var(--brand-muted); font-size:0.875rem;">Reading interface data…</p>
+    </div>
+
+    <!-- Error state -->
+    <div id="errorState" class="empty-state" style="display:none;">
+        <i class="bi bi-exclamation-triangle text-warning"></i>
+        <p id="errorMsg" class="mt-2">Failed to load interface data.</p>
+    </div>
+
+    <!-- Interface info card -->
+    <div id="ifaceCard" class="glass-card" style="display:none;">
+        <div class="glass-card-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="header-icon"><i class="bi bi-hdd-network"></i></div>
+                <h5 id="ifaceCardTitle">wg0</h5>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span id="totalPeersBadge" class="stat-pill stat-pill-muted">0 peers</span>
+                <span id="connectedPeersBadge" class="stat-pill stat-pill-green">0 connected</span>
+            </div>
+        </div>
+        <div class="info-grid" id="ifaceInfoGrid">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- Peers table card -->
+    <div id="peersCard" class="glass-card peers-card" style="display:none;">
+        <div class="glass-card-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="header-icon"><i class="bi bi-people"></i></div>
+                <h5>Current VPN Peers</h5>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="search-box">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" id="peerSearch" placeholder="Search peers…" autocomplete="off">
+                </div>
+                <button class="btn-iface-action" id="addPeerBtn" title="Add new peer">
+                    <i class="bi bi-person-plus"></i>
+                    <span class="d-none d-sm-inline">Add Peer</span>
+                </button>
+                <button class="btn-iface-action" id="applyNatBtn" title="Apply NAT masquerade rules">
+                    <i class="bi bi-router"></i>
+                    <span class="d-none d-sm-inline">Apply NAT</span>
+                </button>
+            </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="vpn-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" style="accent-color:var(--brand-primary);"></th>
+                        <th>Name</th>
+                        <th>Allowed IPs</th>
+                        <th>Endpoint</th>
+                        <th>Status</th>
+                        <th>RX / TX</th>
+                        <th>Keepalive</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="peersTableBody">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination-bar">
+            <div class="d-flex align-items-center gap-2">
+                <span class="pagination-info" id="paginationInfo">0 peers</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <label style="font-size:0.75rem; color:var(--brand-muted); white-space:nowrap;">Per page</label>
+                <select class="per-page-select" id="perPageSelect">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+            <div class="pagination-btns" id="paginationBtns"></div>
+        </div>
+    </div>
+
+    <!-- Empty interface list -->
+    <div id="noIfacesState" class="empty-state glass-card" style="display:none; padding: 4rem 1rem;">
+        <i class="bi bi-hdd-network"></i>
+        <p>No WireGuard interfaces found in <code>/etc/wireguard/</code></p>
+        <p style="font-size:0.78rem;">Make sure the portal has read access to the config directory.</p>
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     EDIT PEER MODAL
+════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="editPeerModal" tabindex="-1" aria-labelledby="editPeerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--brand-surface);border:1px solid var(--brand-border);color:var(--brand-text);">
+      <div class="modal-header" style="border-color:var(--brand-border);">
+        <h5 class="modal-title" id="editPeerModalLabel" style="font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;">
+          <i class="bi bi-pencil me-2" style="color:var(--brand-primary);"></i>Edit Peer
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="font-size:0.85rem;">
+        <div id="editPeerError" class="alert alert-danger py-2" style="display:none;font-size:0.8rem;"></div>
+        <p style="font-size:0.75rem;color:var(--brand-muted);margin-bottom:1rem;">
+          <i class="bi bi-shield-lock me-1"></i>
+          Public key and pre-shared key cannot be changed. To replace keys, delete and re-add the peer.
+        </p>
+        <form id="editPeerForm" novalidate>
+          <div class="mb-3">
+            <label class="form-label" style="font-size:0.75rem;color:var(--brand-muted);letter-spacing:1px;text-transform:uppercase;">Name</label>
+            <input type="text" id="epName" class="form-control form-control-sm"
+              autocomplete="off" pattern="[a-zA-Z0-9][a-zA-Z0-9._\-]{0,62}"
+              style="background:var(--brand-bg);border-color:var(--brand-border);color:var(--brand-text);">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="font-size:0.75rem;color:var(--brand-muted);letter-spacing:1px;text-transform:uppercase;">Allowed IPs</label>
+            <input type="text" id="epIps" class="form-control form-control-sm"
+              placeholder="10.200.20.2/32"
+              style="background:var(--brand-bg);border-color:var(--brand-border);color:var(--brand-text);font-family:monospace;">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="font-size:0.75rem;color:var(--brand-muted);letter-spacing:1px;text-transform:uppercase;">Keepalive (s, 0 = off)</label>
+            <input type="number" id="epKeepalive" class="form-control form-control-sm"
+              min="0" max="3600"
+              style="background:var(--brand-bg);border-color:var(--brand-border);color:var(--brand-text);">
+          </div>
+          <input type="hidden" id="epPubkey">
+        </form>
+      </div>
+      <div class="modal-footer" style="border-color:var(--brand-border);">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal"
+          style="border-color:var(--brand-border);color:var(--brand-muted);">Cancel</button>
+        <button type="button" id="editPeerSaveBtn" class="btn-iface-action">
+          <i class="bi bi-floppy me-1"></i>Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     DELETE PEER MODAL
+════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="deletePeerModal" tabindex="-1" aria-labelledby="deletePeerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--brand-surface);border:1px solid var(--brand-border);color:var(--brand-text);">
+      <div class="modal-header" style="border-color:var(--brand-border);">
+        <h5 class="modal-title" id="deletePeerModalLabel" style="font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;">
+          <i class="bi bi-trash me-2" style="color:#e74c3c;"></i>Delete Peer
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="font-size:0.85rem;">
+        <div id="deletePeerError" class="alert alert-danger py-2" style="display:none;font-size:0.8rem;"></div>
+        <p>Are you sure you want to permanently delete peer
+          <strong id="deletePeerName" style="color:var(--brand-text);"></strong>?
+        </p>
+        <p style="font-size:0.78rem;color:var(--brand-muted);margin-bottom:0;">
+          This will remove the peer from
+          <code>wg0.conf</code>, disconnect it immediately, and delete its key files
+          from <code>/opt/vpn-devices/</code>. This action cannot be undone.
+        </p>
+        <input type="hidden" id="deletePeerPubkey">
+      </div>
+      <div class="modal-footer" style="border-color:var(--brand-border);">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal"
+          style="border-color:var(--brand-border);color:var(--brand-muted);">Cancel</button>
+        <button type="button" id="deletePeerConfirmBtn"
+          style="background:#e74c3c;border:none;color:#fff;padding:6px 16px;border-radius:6px;font-size:0.8rem;cursor:pointer;">
+          <i class="bi bi-trash me-1"></i>Delete Permanently
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ADD PEER MODAL
+════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="addPeerModal" tabindex="-1" aria-labelledby="addPeerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--brand-surface);border:1px solid var(--brand-border);color:var(--brand-text);">
+      <div class="modal-header" style="border-color:var(--brand-border);">
+        <h5 class="modal-title" id="addPeerModalLabel" style="font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;">
+          <i class="bi bi-person-plus me-2" style="color:var(--brand-primary);"></i>Add Peer
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="font-size:0.85rem;">
+        <div id="addPeerError" class="alert alert-danger py-2" style="display:none;font-size:0.8rem;"></div>
+        <form id="addPeerForm" novalidate>
+          <div class="mb-3">
+            <label class="form-label" style="font-size:0.75rem;color:var(--brand-muted);letter-spacing:1px;text-transform:uppercase;">Peer Name *</label>
+            <input type="text" id="apName" class="form-control form-control-sm"
+              placeholder="e.g. laptop-work" autocomplete="off" required
+              pattern="[a-zA-Z0-9][a-zA-Z0-9._\-]{0,62}"
+              style="background:var(--brand-bg);border-color:var(--brand-border);color:var(--brand-text);">
+            <div class="form-text" style="font-size:0.72rem;color:var(--brand-muted);">Alphanumeric, dash, dot, underscore. Used as folder name.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="font-size:0.75rem;color:var(--brand-muted);letter-spacing:1px;text-transform:uppercase;">VPN IP (AllowedIPs on server) *</label>
+            <div class="input-group input-group-sm">
+              <input type="text" id="apIp" class="form-control"
+                placeholder="10.200.20.x/32" required
+                style="background:var(--brand-bg);border-color:var(--brand-border);color:var(--brand-text);font-family:monospace;">
+              <button type="button" class="btn btn-outline-secondary" id="apNextIpBtn" title="Suggest next available IP" style="border-color:var(--brand-border);color:var(--brand-muted);font-size:0.75rem;">
+                <i class="bi bi-magic"></i>
+              </button>
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-7">
+              <label class="form-label" style="font-size:0.75rem;color:var(--brand-muted);letter-spacing:1px;text-transform:uppercase;">Endpoint</label>
+              <input type="text" id="apEndpoint" class="form-control form-control-sm"
+                placeholder="vpn.example.com:51820"
+                style="background:var(--brand-bg);border-color:var(--brand-border);color:var(--brand-text);font-family:monospace;">
+            </div>
+            <div class="col-5">
+              <label class="form-label" style="font-size:0.75rem;color:var(--brand-muted);letter-spacing:1px;text-transform:uppercase;">Keepalive (s)</label>
+              <input type="number" id="apKeepalive" class="form-control form-control-sm"
+                value="25" min="0" max="3600"
+                style="background:var(--brand-bg);border-color:var(--brand-border);color:var(--brand-text);">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="font-size:0.75rem;color:var(--brand-muted);letter-spacing:1px;text-transform:uppercase;">DNS</label>
+            <input type="text" id="apDns" class="form-control form-control-sm"
+              value="192.168.0.1"
+              style="background:var(--brand-bg);border-color:var(--brand-border);color:var(--brand-text);font-family:monospace;">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="font-size:0.75rem;color:var(--brand-muted);letter-spacing:1px;text-transform:uppercase;">Client Routes (AllowedIPs on peer)</label>
+            <input type="text" id="apRoutes" class="form-control form-control-sm"
+              value="192.168.0.0/24, 10.200.20.0/24"
+              style="background:var(--brand-bg);border-color:var(--brand-border);color:var(--brand-text);font-family:monospace;">
+            <div class="form-text" style="font-size:0.72rem;color:var(--brand-muted);">Traffic the client will route through the VPN tunnel.</div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="border-color:var(--brand-border);">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal"
+          style="border-color:var(--brand-border);color:var(--brand-muted);">Cancel</button>
+        <button type="button" id="addPeerSubmitBtn" class="btn-iface-action">
+          <i class="bi bi-plus-circle me-1"></i>Create Peer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     QR CODE MODAL
+════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="peerQrModal" tabindex="-1" aria-labelledby="peerQrModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--brand-surface);border:1px solid var(--brand-border);color:var(--brand-text);">
+      <div class="modal-header" style="border-color:var(--brand-border);">
+        <h5 class="modal-title" id="peerQrModalLabel" style="font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;">
+          <i class="bi bi-qr-code me-2" style="color:var(--brand-primary);"></i>
+          <span id="peerQrTitle">Peer QR Code</span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <div id="peerQrLoading" style="padding:2rem 0;color:var(--brand-muted);font-size:0.85rem;">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>Generating QR code…
+        </div>
+        <div id="peerQrError" class="alert alert-danger py-2" style="display:none;font-size:0.8rem;"></div>
+        <img id="peerQrImage" src="" alt="WireGuard peer QR code"
+          style="display:none;max-width:260px;width:100%;border-radius:8px;">
+        <p id="peerQrHint" style="display:none;font-size:0.75rem;color:var(--brand-muted);margin-top:0.75rem;">
+          Scan with the WireGuard mobile app to configure this peer.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     NAT MASQUERADE MODAL
+════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="natModal" tabindex="-1" aria-labelledby="natModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="background:var(--brand-surface);border:1px solid var(--brand-border);color:var(--brand-text);">
+      <div class="modal-header" style="border-color:var(--brand-border);">
+        <h5 class="modal-title" id="natModalLabel" style="font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;">
+          <i class="bi bi-router me-2" style="color:var(--brand-primary);"></i>Apply NAT Masquerade
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="font-size:0.85rem;">
+        <!-- Description -->
+        <div class="alert" style="background:rgba(52,152,219,0.08);border:1px solid rgba(52,152,219,0.25);color:var(--brand-text);font-size:0.82rem;padding:0.75rem 1rem;border-radius:6px;">
+          <i class="bi bi-info-circle me-2" style="color:#3498db;"></i>
+          If your server sits behind a router whose routing table you cannot modify, these nftables rules
+          will masquerade outbound VPN traffic so connected peers can reach the rest of your local network
+          without any router reconfiguration.
+        </div>
+
+        <div id="natError" class="alert alert-danger py-2 mt-3" style="display:none;font-size:0.8rem;"></div>
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-5">
+            <label class="form-label" style="font-size:0.75rem;color:var(--brand-muted);letter-spacing:1px;text-transform:uppercase;">WireGuard Subnet</label>
+            <input type="text" id="natSubnet" class="form-control form-control-sm" readonly
+              style="background:rgba(255,255,255,0.04);border-color:var(--brand-border);color:var(--brand-muted);font-family:monospace;">
+          </div>
+          <div class="col-md-7">
+            <label class="form-label" style="font-size:0.75rem;color:var(--brand-muted);letter-spacing:1px;text-transform:uppercase;">Outbound Interface (your server’s LAN port)</label>
+            <div class="input-group input-group-sm">
+              <select id="natIfaceSelect" class="form-select"
+                style="background:var(--brand-bg);border-color:var(--brand-border);color:var(--brand-text);">
+                <option value="">Loading interfaces…</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Commands preview -->
+        <div class="mt-3">
+          <label class="form-label" style="font-size:0.75rem;color:var(--brand-muted);letter-spacing:1px;text-transform:uppercase;">Commands that will run on the server</label>
+          <pre id="natCmdPreview" style="background:#0d1117;border:1px solid var(--brand-border);border-radius:6px;padding:0.75rem 1rem;font-size:0.78rem;color:#a0d8ef;white-space:pre-wrap;word-break:break-all;margin:0;"></pre>
+        </div>
+
+        <p style="font-size:0.72rem;color:var(--brand-muted);margin-top:0.6rem;margin-bottom:0;">
+          <i class="bi bi-exclamation-triangle me-1"></i>
+          These rules are applied immediately but are <strong>not persistent</strong> across reboots.
+          To make them permanent, add them to <code>/etc/nftables.conf</code> or your network startup scripts.
+        </p>
+      </div>
+      <div class="modal-footer" style="border-color:var(--brand-border);">
+        <button type="button" id="natCopyBtn" class="btn btn-sm btn-outline-secondary"
+          style="border-color:var(--brand-border);color:var(--brand-muted);">
+          <i class="bi bi-clipboard me-1"></i>Copy Commands
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal"
+          style="border-color:var(--brand-border);color:var(--brand-muted);">Cancel</button>
+        <button type="button" id="natApplyBtn" class="btn-iface-action">
+          <i class="bi bi-lightning-charge me-1"></i>Apply Rules
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     IDLE TIMEOUT OVERLAY
+════════════════════════════════════════════════════════════════ -->
+<div id="idleOverlay">
+    <div class="idle-box">
+        <h5><i class="bi bi-clock-history me-2"></i>Session Expiring</h5>
+        <p style="font-size:0.875rem; color:var(--brand-muted);">
+            You have been idle for a while. Logging out in
+            <strong id="idleCountdown" style="color:#fff;">60</strong>s.
+        </p>
+        <button class="btn-iface-action mt-2 w-100 justify-content-center" id="idleStayBtn">
+            Stay Logged In
+        </button>
+    </div>
+</div>
+
+<!-- Bootstrap 5.3 bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/interfaces.js"></script>
+
+</body>
+</html>
